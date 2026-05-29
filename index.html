@@ -739,6 +739,7 @@ function createIsland(name,x,z,size,type) {
         box(32,12,25,mats.hangar,runwayWidth*2.1,10,size*0.1+i*32,g);
       }
 
+      addAirportModelsToIsland(g, runwayWidth, size);
       createParkedPlane(g,runwayWidth*1.35,-size*0.05);
       createParkedPlane(g,runwayWidth*1.75,-size*0.05);
       createAirportCrowd(g,size);
@@ -1018,6 +1019,42 @@ let currentAirport = "Starter Island";
 let message = "Mission: explore infinite islands and survive.";
 let crashed = false;
 const crashPieces = [];
+
+let jetwayTemplate = null;
+let cateringTruckTemplate = null;
+
+new OBJLoader().load(
+  "models/airports/Jetway.obj",
+  obj => {
+    jetwayTemplate = obj;
+  }
+);
+
+new OBJLoader().load(
+  "models/airports/Catering Truck.obj",
+  obj => {
+    cateringTruckTemplate = obj;
+  }
+);
+
+function addAirportModelsToIsland(group, runwayWidth, size){
+  if(jetwayTemplate){
+    const jetway = jetwayTemplate.clone(true);
+    jetway.scale.set(0.18,0.18,0.18);
+    jetway.position.set(runwayWidth*2.1,4.2,-size*0.34);
+    jetway.rotation.y = Math.PI / 2;
+    group.add(jetway);
+  }
+
+  if(cateringTruckTemplate){
+    const truck = cateringTruckTemplate.clone(true);
+    truck.scale.set(0.08,0.08,0.08);
+    truck.position.set(runwayWidth*1.45,4.2,-size*0.18);
+    truck.rotation.y = Math.PI / 2;
+    group.add(truck);
+  }
+}
+
 
 // JETVERSE_CRASH_EXPLOSION_SIMPLE
 
@@ -1620,26 +1657,6 @@ function animate() {
   updateCrashExplosion();
   renderer.render(scene,camera);
 }
-
-
-// SIMPLE AIRPORT MODELS
-new OBJLoader().load(
-  "models/airports/Jetway.obj",
-  obj => {
-    obj.scale.set(0.18,0.18,0.18);
-    obj.position.set(1230,4,-860);
-    scene.add(obj);
-  }
-);
-
-new OBJLoader().load(
-  "models/airports/Catering Truck.obj",
-  obj => {
-    obj.scale.set(0.08,0.08,0.08);
-    obj.position.set(1220,4,-870);
-    scene.add(obj);
-  }
-);
 
 
 animate();
