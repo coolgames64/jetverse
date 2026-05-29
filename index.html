@@ -1025,14 +1025,16 @@ let cateringTruckTemplate = null;
 new OBJLoader().load(
   "models/airports/Jetway.obj",
   obj => {
-    jetwayTemplate = obj;\n    refreshAirportProps();
+    jetwayTemplate = obj;
+    refreshAirportProps();
   }
 );
 
 new OBJLoader().load(
   "models/airports/Catering Truck.obj",
   obj => {
-    cateringTruckTemplate = obj;\n    refreshAirportProps();
+    cateringTruckTemplate = obj;
+    refreshAirportProps();
   }
 );
 
@@ -1048,7 +1050,8 @@ function refreshAirportProps(){
     }
   });
 }
-\nfunction addAirportModelsToIsland(group, runwayWidth, size){
+
+function addAirportModelsToIsland(group, runwayWidth, size){
   if(jetwayTemplate){
     const jetway = jetwayTemplate.clone(true);
     jetway.scale.set(0.18,0.18,0.18);
