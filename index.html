@@ -1597,8 +1597,8 @@ function animate() {
 new OBJLoader().load(
   "models/airports/Jetway.obj",
   obj => {
-    const box = new THREE.Box3().setFromObject(obj);
-    const center = box.getCenter(new THREE.Vector3());
+    const jetwayBox = new THREE.Box3().setFromObject(obj);
+    const center = jetwayBox.getCenter(new THREE.Vector3());
     obj.position.sub(center);
 
     const wrapper = new THREE.Group();
@@ -1613,8 +1613,8 @@ new OBJLoader().load(
     scene.add(wrapper);
     
 console.log("JETWAY BOUNDS",
-box.min.x, box.min.y, box.min.z,
-box.max.x, box.max.y, box.max.z);
+jetwayBox.min.x, jetwayBox.min.y, jetwayBox.min.z,
+jetwayBox.max.x, jetwayBox.max.y, jetwayBox.max.z);
 
   },
   undefined,
