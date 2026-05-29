@@ -1605,8 +1605,10 @@ new OBJLoader().load(
     wrapper.add(obj);
 
     wrapper.scale.set(0.05,0.05,0.05);
-    wrapper.position.copy(plane.position);
-    wrapper.position.y += 50;
+    const dir = new THREE.Vector3();
+    camera.getWorldDirection(dir);
+    wrapper.position.copy(camera.position);
+    wrapper.position.add(dir.multiplyScalar(40));
 
     scene.add(wrapper);
     console.log("JETWAY CENTERED DEBUG LOADED", wrapper);
