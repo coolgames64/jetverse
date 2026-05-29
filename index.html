@@ -1054,8 +1054,8 @@ function refreshAirportProps(){
 function addAirportModelsToIsland(group, runwayWidth, size){
   if(jetwayTemplate){
     const jetway = jetwayTemplate.clone(true);
-    jetway.scale.set(0.18,0.18,0.18);
-    jetway.position.set(runwayWidth*2.1,4.2,-size*0.34);
+    jetway.scale.set(0.55,0.55,0.55);
+    jetway.position.set(runwayWidth*1.45,4.2,-size*0.05);
     jetway.rotation.y = Math.PI / 2;
     group.add(jetway);
   }
