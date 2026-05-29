@@ -1025,20 +1025,21 @@ const crashPieces = [];
 function explodeCrash(){
   console.log("EXPLOSION TRIGGERED");
 
-  if(plane) plane.visible = false;
+  // if(plane) plane.visible = false;
 
   const blast = new THREE.Mesh(
-    new THREE.SphereGeometry(18,32,32),
+    new THREE.SphereGeometry(60,32,32),
     new THREE.MeshBasicMaterial({
       color:0xff6600,
       transparent:true,
-      opacity:0.85
+      opacity:1
     })
   );
 
   blast.position.copy(plane.position);
   scene.add(blast);
 
+  blast.userData = {vx:0, vy:0, vz:0, life:240};
   crashPieces.push(blast);
 
   for(let i=0;i<80;i++){
