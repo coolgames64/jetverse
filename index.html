@@ -1602,7 +1602,21 @@ function animate() {
 }
 
 
-animate();
+
+// OBJ DEBUG SPAWN AT PLANE
+new OBJLoader().load(
+  "models/airports/Jetway.obj",
+  obj => {
+    obj.scale.set(0.08,0.08,0.08);
+    obj.position.copy(plane.position);
+    obj.position.y += 30;
+    scene.add(obj);
+    console.log("JETWAY OBJ DEBUG LOADED", obj);
+  },
+  undefined,
+  err => console.error("JETWAY OBJ FAILED", err)
+);
+\n\nanimate();
 
 addEventListener("resize", () => {
   camera.aspect = innerWidth / innerHeight;
