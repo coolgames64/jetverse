@@ -1026,18 +1026,30 @@ let cateringTruckTemplate = null;
 new OBJLoader().load(
   "models/airports/Jetway.obj",
   obj => {
-    jetwayTemplate = obj;
+    jetwayTemplate = obj;\n    refreshAirportProps();
   }
 );
 
 new OBJLoader().load(
   "models/airports/Catering Truck.obj",
   obj => {
-    cateringTruckTemplate = obj;
+    cateringTruckTemplate = obj;\n    refreshAirportProps();
   }
 );
 
-function addAirportModelsToIsland(group, runwayWidth, size){
+
+function refreshAirportProps(){
+  if(!jetwayTemplate || !cateringTruckTemplate) return;
+
+  islandNodes.forEach(n=>{
+    if(n.island.type === "airport" && !n.group.userData.airportPropsAdded){
+      const runwayWidth = n.island.size * 0.22;
+      addAirportModelsToIsland(n.group, runwayWidth, n.island.size);
+      n.group.userData.airportPropsAdded = true;
+    }
+  });
+}
+\nfunction addAirportModelsToIsland(group, runwayWidth, size){
   if(jetwayTemplate){
     const jetway = jetwayTemplate.clone(true);
     jetway.scale.set(0.18,0.18,0.18);
