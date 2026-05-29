@@ -1070,77 +1070,6 @@ function addAirportModelsToIsland(group, runwayWidth, size){
 }
 
 
-// JETVERSE_CRASH_EXPLOSION_SIMPLE
-
-
-
-function explodeCrash(){
-  console.log("BIG VISIBLE EXPLOSION");
-
-  const pos = new THREE.Vector3();
-  camera.getWorldDirection(pos);
-  pos.multiplyScalar(45);
-  pos.add(camera.position);
-
-  const group = new THREE.Group();
-  group.position.copy(pos);
-  scene.add(group);
-
-  const blast = new THREE.Mesh(
-    new THREE.SphereGeometry(14,32,32),
-    new THREE.MeshBasicMaterial({
-      color:0xff3300,
-      transparent:false
-    })
-  );
-  group.add(blast);
-
-  for(let i=0;i<40;i++){
-    const piece = new THREE.Mesh(
-      new THREE.BoxGeometry(2,2,2),
-      new THREE.MeshBasicMaterial({
-        color: Math.random() > 0.5 ? 0xffaa00 : 0xff0000
-      })
-    );
-
-    piece.position.set(
-      (Math.random()-0.5)*20,
-      (Math.random()-0.5)*20,
-      (Math.random()-0.5)*20
-    );
-
-    group.add(piece);
-  }
-
-  setTimeout(()=>scene.remove(group),1800);
-}
-
-
-
-
-function updateCrashExplosion(){
-  for(let i=crashPieces.length-1;i>=0;i--){
-    const piece = crashPieces[i];
-
-    piece.position.x += piece.userData.vx;
-    piece.position.y += piece.userData.vy;
-    piece.position.z += piece.userData.vz;
-
-    piece.userData.vy -= 0.03;
-
-    piece.rotation.x += piece.userData.rx;
-    piece.rotation.y += piece.userData.ry;
-    piece.rotation.z += piece.userData.rz;
-
-    piece.userData.life--;
-
-    if(piece.userData.life <= 0){
-      scene.remove(piece);
-      crashPieces.splice(i,1);
-    }
-  }
-}
-
 let cockpitView = false;
 let gearDown = true;
 let flapsDown = false;
@@ -1668,7 +1597,7 @@ function animate() {
 
   if(savedNoticeTimer > 0) savedNoticeTimer--;
 
-  updateCrashExplosion();
+  
   renderer.render(scene,camera);
 }
 
