@@ -1017,6 +1017,75 @@ let hunger = 100;
 let currentAirport = "Starter Island";
 let message = "Mission: explore infinite islands and survive.";
 let crashed = false;
+  crashAnimationPlayed = false;
+  if(plane) plane.visible = true;
+let crashAnimationPlayed = false;
+const crashPieces = [];
+
+// JETVERSE_CRASH_EXPLOSION_SIMPLE
+function explodeCrash(){
+  if(crashAnimationPlayed) return;
+  crashAnimationPlayed = true;
+
+  if(plane) plane.visible = false;
+
+  for(let i=0;i<45;i++){
+    const piece = new THREE.Mesh(
+      new THREE.BoxGeometry(
+        0.5 + Math.random()*2.5,
+        0.3 + Math.random()*1.2,
+        0.5 + Math.random()*2.5
+      ),
+      new THREE.MeshStandardMaterial({
+        color: Math.random() > 0.5 ? 0xff5522 : 0x333333,
+        emissive: Math.random() > 0.55 ? 0xff2200 : 0x000000,
+        emissiveIntensity: 1.2,
+        roughness: 0.7,
+        metalness: 0.25
+      })
+    );
+
+    piece.position.copy(plane.position);
+    piece.position.x += (Math.random()-0.5)*6;
+    piece.position.y += (Math.random()-0.5)*4;
+    piece.position.z += (Math.random()-0.5)*6;
+
+    piece.userData.vx = (Math.random()-0.5)*1.8;
+    piece.userData.vy = Math.random()*1.5;
+    piece.userData.vz = (Math.random()-0.5)*1.8;
+    piece.userData.rx = (Math.random()-0.5)*0.3;
+    piece.userData.ry = (Math.random()-0.5)*0.3;
+    piece.userData.rz = (Math.random()-0.5)*0.3;
+    piece.userData.life = 180;
+
+    scene.add(piece);
+    crashPieces.push(piece);
+  }
+}
+
+function updateCrashExplosion(){
+  for(let i=crashPieces.length-1;i>=0;i--){
+    const piece = crashPieces[i];
+
+    piece.position.x += piece.userData.vx;
+    piece.position.y += piece.userData.vy;
+    piece.position.z += piece.userData.vz;
+
+    piece.userData.vy -= 0.03;
+
+    piece.rotation.x += piece.userData.rx;
+    piece.rotation.y += piece.userData.ry;
+    piece.rotation.z += piece.userData.rz;
+
+    piece.userData.life--;
+
+    if(piece.userData.life <= 0){
+      scene.remove(piece);
+      crashPieces.splice(i,1);
+    }
+  }
+}
+
 let cockpitView = false;
 let gearDown = true;
 let flapsDown = false;
@@ -1246,6 +1315,7 @@ function updateFlying() {
         throttle = 0;
         verticalSpeed = 0;
         crashed = true;
+        explodeCrash();
       } else if(surfaceNow === "grass") {
         if(tooFast || tooHard) {
           message = "ROUGH GRASS LANDING! You survived, but slow down.";
@@ -1544,6 +1614,7 @@ function animate() {
 
   if(savedNoticeTimer > 0) savedNoticeTimer--;
 
+  updateCrashExplosion();
   renderer.render(scene,camera);
 }
 
