@@ -1062,8 +1062,8 @@ function addAirportModelsToIsland(group, runwayWidth, size){
 
   if(cateringTruckTemplate){
     const truck = cateringTruckTemplate.clone(true);
-    truck.scale.set(0.08,0.08,0.08);
-    truck.position.set(runwayWidth*1.45,4.2,-size*0.18);
+    truck.scale.set(5,5,5);
+    truck.position.set(20,20,0);
     truck.rotation.y = Math.PI / 2;
     group.add(truck);
   }
