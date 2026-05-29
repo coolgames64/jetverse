@@ -1319,7 +1319,6 @@ function updateFlying() {
         throttle = 0;
         verticalSpeed = 0;
         crashed = true;
-        explodeCrash();
       } else if(surfaceNow === "grass") {
         if(tooFast || tooHard) {
           message = "ROUGH GRASS LANDING! You survived, but slow down.";
