@@ -1611,7 +1611,12 @@ new OBJLoader().load(
     wrapper.position.add(dir.multiplyScalar(40));
 
     scene.add(wrapper);
-    console.log("JETWAY CENTERED DEBUG LOADED", wrapper);
+    
+const box = new THREE.Box3().setFromObject(wrapper);
+console.log("JETWAY BOUNDS",
+box.min.x, box.min.y, box.min.z,
+box.max.x, box.max.y, box.max.z);
+
   },
   undefined,
   err => console.error("JETWAY OBJ FAILED", err)
