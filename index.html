@@ -1022,46 +1022,48 @@ const crashPieces = [];
 // JETVERSE_CRASH_EXPLOSION_SIMPLE
 
 
-function explodeCrash(){
-  console.log("EXPLOSION TRIGGERED");
 
-  // if(plane) plane.visible = false;
+function explodeCrash(){
+  console.log("BIG VISIBLE EXPLOSION");
+
+  const pos = new THREE.Vector3();
+  camera.getWorldDirection(pos);
+  pos.multiplyScalar(45);
+  pos.add(camera.position);
+
+  const group = new THREE.Group();
+  group.position.copy(pos);
+  scene.add(group);
 
   const blast = new THREE.Mesh(
-    new THREE.SphereGeometry(60,32,32),
+    new THREE.SphereGeometry(14,32,32),
     new THREE.MeshBasicMaterial({
-      color:0xff6600,
-      transparent:true,
-      opacity:1
+      color:0xff3300,
+      transparent:false
     })
   );
+  group.add(blast);
 
-  blast.position.copy(plane.position);
-  scene.add(blast);
-
-  blast.userData = {vx:0, vy:0, vz:0, life:240};
-  crashPieces.push(blast);
-
-  for(let i=0;i<80;i++){
+  for(let i=0;i<40;i++){
     const piece = new THREE.Mesh(
-      new THREE.BoxGeometry(3,3,3),
+      new THREE.BoxGeometry(2,2,2),
       new THREE.MeshBasicMaterial({
-        color: Math.random() > 0.5 ? 0xff3300 : 0x111111
+        color: Math.random() > 0.5 ? 0xffaa00 : 0xff0000
       })
     );
 
-    piece.position.copy(plane.position);
-    piece.userData = {
-      vx:(Math.random()-0.5)*3,
-      vy:Math.random()*3,
-      vz:(Math.random()-0.5)*3,
-      life:180
-    };
+    piece.position.set(
+      (Math.random()-0.5)*20,
+      (Math.random()-0.5)*20,
+      (Math.random()-0.5)*20
+    );
 
-    scene.add(piece);
-    crashPieces.push(piece);
+    group.add(piece);
   }
+
+  setTimeout(()=>scene.remove(group),1800);
 }
+
 
 
 
