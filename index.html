@@ -1026,7 +1026,7 @@ new OBJLoader().load(
   "models/airports/Jetway.obj",
   obj => {
     jetwayTemplate = obj;
-    refreshAirportProps();
+    
   }
 );
 
@@ -1034,22 +1034,12 @@ new OBJLoader().load(
   "models/airports/Catering Truck.obj",
   obj => {
     cateringTruckTemplate = obj;
-    refreshAirportProps();
+    
   }
 );
 
 
-function refreshAirportProps(){
-  if(!jetwayTemplate || !cateringTruckTemplate) return;
 
-  islandNodes.forEach(n=>{
-    if(n.island.type === "airport" && !n.group.userData.airportPropsAdded){
-      const runwayWidth = n.island.size * 0.22;
-      addAirportModelsToIsland(n.group, runwayWidth, n.island.size);
-      n.group.userData.airportPropsAdded = true;
-    }
-  });
-}
 
 function addAirportModelsToIsland(group, runwayWidth, size){
   if(jetwayTemplate){
