@@ -1,0 +1,1559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>JetVerse</title>
+
+  <style>
+    html, body {
+      margin: 0;
+      overflow: hidden;
+      background: #000;
+      font-family: Arial, sans-serif;
+      touch-action: none;
+      user-select: none;
+    }
+
+    #title {
+      position: fixed;
+      top: 14px;
+      right: 18px;
+      color: white;
+      font-size: 32px;
+      font-weight: bold;
+      text-shadow: 0 3px 10px black;
+      z-index: 20;
+    }
+
+    #hud {
+      position: fixed;
+      top: 12px;
+      left: 12px;
+      color: white;
+      background: rgba(0,0,0,0.62);
+      padding: 12px 15px;
+      border-radius: 14px;
+      line-height: 1.55;
+      font-size: 15px;
+      z-index: 20;
+      max-width: 44vw;
+    }
+
+    #nav {
+      position: fixed;
+      top: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.55);
+      padding: 9px 14px;
+      border-radius: 14px;
+      z-index: 25;
+      white-space: nowrap;
+    }
+
+    #nav a {
+      color: white;
+      margin: 0 8px;
+      text-decoration: none;
+      font-size: 14px;
+    }
+
+    #guide {
+      position: fixed;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: white;
+      background: rgba(0,0,0,0.68);
+      padding: 12px 18px;
+      border-radius: 16px;
+      text-align: center;
+      font-size: 17px;
+      min-width: 560px;
+      z-index: 20;
+    }
+
+    #mobileControls {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 30;
+    }
+
+    .mobileBtn {
+      position: absolute;
+      width: 74px;
+      height: 74px;
+      border-radius: 50%;
+      border: 2px solid rgba(255,255,255,0.25);
+      background: rgba(255,255,255,0.16);
+      color: white;
+      font-size: 28px;
+      font-weight: bold;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      pointer-events: auto;
+      backdrop-filter: blur(4px);
+    }
+
+    #leftBtn { left: 18px; bottom: 24px; }
+    #rightBtn { left: 108px; bottom: 24px; }
+    #upBtn { right: 108px; bottom: 114px; }
+    #downBtn { right: 108px; bottom: 24px; }
+    #throttleBtn { right: 18px; bottom: 24px; }
+    #exitBtn { right: 18px; bottom: 114px; font-size: 20px; }
+
+    @media (max-width: 900px) {
+      #title {
+        font-size: 21px;
+        top: 8px;
+        right: 9px;
+      }
+
+      #hud {
+        top: 8px;
+        left: 8px;
+        font-size: 11px;
+        padding: 9px 11px;
+        max-width: 47vw;
+      }
+
+      #nav {
+        top: 72px;
+        font-size: 11px;
+        padding: 7px 10px;
+      }
+
+      #nav a {
+        font-size: 11px;
+        margin: 0 4px;
+      }
+
+      #guide {
+        bottom: 8px;
+        font-size: 11px;
+        min-width: 0;
+        width: 92vw;
+        padding: 9px;
+      }
+
+      .mobileBtn {
+        display: flex;
+      }
+    }
+  </style>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+    }
+  }
+  </script>
+</head>
+
+<body>
+<div id="shopButton" style="
+position:fixed;
+top:18px;
+right:180px;
+z-index:99999;
+background:#ffcc00;
+color:black;
+padding:10px 16px;
+border-radius:14px;
+font-weight:bold;
+cursor:pointer;
+font-family:Arial;
+box-shadow:0 4px 14px rgba(0,0,0,0.4);
+">
+🛒 Shop
+</div>
+  <div id="title">JETVERSE</div>
+
+  <div id="nav">
+    <a href="about.html">About</a>
+    <a href="updates.html">Updates</a>
+    <a href="privacy.html">Privacy</a>
+    <a href="contact.html">Contact</a>
+  </div>
+
+  <div id="premiumBanner" style="
+    position:fixed;
+    top:70px;
+    right:18px;
+    z-index:25;
+    background:rgba(255,215,0,0.18);
+    border:2px solid rgba(255,215,0,0.35);
+    color:white;
+    padding:10px 14px;
+    border-radius:14px;
+    font-size:13px;
+    backdrop-filter:blur(6px);
+  ">
+    ✨ JetVerse Plus<br>
+    Unlock TurboJet at 250 coins
+  </div>
+
+  <div id="hud">
+    Mode: <span id="mode">Flying</span><br>
+    Speed: <span id="speed">0</span><br>
+    Altitude: <span id="altitude">0</span><br>
+    Fuel: <span id="fuel">100</span>%<br>
+    Coins: <span id="coins">0</span><br>
+    Aircraft: <span id="aircraftName">Starter Prop</span><br>
+    Hunger: <span id="hunger">100</span>%<br>
+    Islands Found: <span id="found">0</span>/<span id="total">∞</span><br>
+    Nearest: <span id="nearest">---</span><br>
+    Distance: <span id="distance">0</span>m
+  </div>
+
+  <div id="cockpitOverlay" style="
+    display:none;
+    position:fixed;
+    inset:0;
+    z-index:18;
+    pointer-events:none;
+  ">
+    <div style="
+      position:absolute;
+      bottom:0;
+      left:0;
+      right:0;
+      height:30vh;
+      background:linear-gradient(to top, rgba(0,0,0,0.88), rgba(0,0,0,0.25), transparent);
+    "></div>
+    <div style="
+      position:absolute;
+      bottom:22px;
+      left:50%;
+      transform:translateX(-50%);
+      display:flex;
+      gap:14px;
+      color:white;
+      font-weight:bold;
+      text-align:center;
+    ">
+      <div style="background:rgba(0,0,0,0.7); padding:12px 18px; border-radius:14px;">
+        SPD<br><span id="cockpitSpeed">0</span>
+      </div>
+      <div style="background:rgba(0,0,0,0.7); padding:12px 18px; border-radius:14px;">
+        ALT<br><span id="cockpitAlt">0</span>
+      </div>
+      <div style="background:rgba(0,0,0,0.7); padding:12px 18px; border-radius:14px;">
+        FUEL<br><span id="cockpitFuel">100</span>%
+      </div>
+    </div>
+  </div>
+
+  <div id="mobileControls">
+    <div class="mobileBtn" id="leftBtn">◀</div>
+    <div class="mobileBtn" id="rightBtn">▶</div>
+    <div class="mobileBtn" id="upBtn">↑</div>
+    <div class="mobileBtn" id="downBtn">↓</div>
+    <div class="mobileBtn" id="throttleBtn">W</div>
+    <div class="mobileBtn" id="exitBtn">F</div>
+  </div>
+
+  <div id="guide">
+    <span id="controls">W throttle · S brake · A/D steer · ↑/↓ pitch · F exit · C cockpit · R reset</span><br>
+    <span id="message">Mission: explore infinite islands and survive.</span>
+  </div>
+
+<script type="module">
+import * as THREE from "three";
+import { OBJLoader } from "three/addons/loaders/OBJLoader.js";
+import { MTLLoader } from "three/addons/loaders/MTLLoader.js";
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x92d7ff);
+scene.fog = new THREE.Fog(0x92d7ff, 350, 3800);
+
+const camera = new THREE.PerspectiveCamera(70, innerWidth / innerHeight, 0.1, 12000);
+
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+document.body.appendChild(renderer.domElement);
+
+scene.add(new THREE.AmbientLight(0xffffff, 0.72));
+
+const sun = new THREE.DirectionalLight(0xffffff, 1.35);
+sun.position.set(600, 800, 350);
+sun.castShadow = true;
+sun.shadow.mapSize.width = 2048;
+sun.shadow.mapSize.height = 2048;
+sun.shadow.camera.left = -900;
+sun.shadow.camera.right = 900;
+sun.shadow.camera.top = 900;
+sun.shadow.camera.bottom = -900;
+scene.add(sun);
+
+const oceanMaterial = new THREE.MeshStandardMaterial({
+  color: 0x1f7fea,
+  roughness: 0.42,
+  metalness: 0.04
+});
+
+const ocean = new THREE.Mesh(
+  new THREE.PlaneGeometry(20000, 20000, 80, 80),
+  oceanMaterial
+);
+ocean.rotation.x = -Math.PI / 2;
+ocean.position.y = -1;
+ocean.receiveShadow = true;
+scene.add(ocean);
+
+const mats = {
+  grass: new THREE.MeshStandardMaterial({ color: 0x2fa64a }),
+  sand: new THREE.MeshStandardMaterial({ color: 0xd9c17a }),
+  rock: new THREE.MeshStandardMaterial({ color: 0x777777 }),
+  asphalt: new THREE.MeshStandardMaterial({ color: 0x292929 }),
+  taxi: new THREE.MeshStandardMaterial({ color: 0x444444 }),
+  white: new THREE.MeshStandardMaterial({ color: 0xffffff }),
+  yellow: new THREE.MeshStandardMaterial({ color: 0xffd400, emissive: 0x332800 }),
+  fuel: new THREE.MeshStandardMaterial({ color: 0xffd700, emissive: 0x553300 }),
+  terminal: new THREE.MeshStandardMaterial({ color: 0xbac6d3 }),
+  glass: new THREE.MeshStandardMaterial({ color: 0x1d3a66, roughness: 0.08, metalness: 0.35 }),
+  cafe: new THREE.MeshStandardMaterial({ color: 0xff8844 }),
+  hangar: new THREE.MeshStandardMaterial({ color: 0x777777 }),
+  red: new THREE.MeshStandardMaterial({ color: 0xff2222, roughness: 0.25, metalness: 0.12 }),
+  dark: new THREE.MeshStandardMaterial({ color: 0x111133, roughness: 0.12, metalness: 0.4 })
+};
+
+function box(w,h,d,mat,x,y,z,g) {
+  const m = new THREE.Mesh(new THREE.BoxGeometry(w,h,d), mat);
+  m.position.set(x,y,z);
+  m.castShadow = true;
+  m.receiveShadow = true;
+  g.add(m);
+  return m;
+}
+
+function sign(text,x,y,z,g,scale=1) {
+  const c = document.createElement("canvas");
+  c.width = 512;
+  c.height = 128;
+  const ctx = c.getContext("2d");
+  ctx.fillStyle = "#111";
+  ctx.fillRect(0,0,512,128);
+  ctx.fillStyle = "#fff";
+  ctx.font = "bold 42px Arial";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText(text,256,64);
+
+  const tex = new THREE.CanvasTexture(c);
+  const s = new THREE.Mesh(
+    new THREE.PlaneGeometry(18*scale,4.5*scale),
+    new THREE.MeshBasicMaterial({ map: tex })
+  );
+  s.position.set(x,y,z);
+  g.add(s);
+  return s;
+}
+
+const islands = [];
+const npcs = [];
+const serviceVehicles = [];
+const generatedChunks = new Set();
+const chunkSize = 900;
+let islandCounter = 0;
+
+function seededRandom(seed) {
+  const x = Math.sin(seed) * 10000;
+  return x - Math.floor(x);
+}
+
+function createTree(g,x,z) {
+  const t = new THREE.Group();
+
+  const trunk = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.45,0.55,3,10),
+    new THREE.MeshStandardMaterial({ color: 0x8b5a2b })
+  );
+  trunk.position.y = 4.8;
+  trunk.castShadow = true;
+  t.add(trunk);
+
+  const leaves = new THREE.Mesh(
+    new THREE.SphereGeometry(2.2,16,16),
+    new THREE.MeshStandardMaterial({ color: 0x146b24 })
+  );
+  leaves.position.y = 7;
+  leaves.castShadow = true;
+  t.add(leaves);
+
+  t.position.set(x,0,z);
+  g.add(t);
+}
+
+function createParkedPlane(g,x,z) {
+  const p = new THREE.Group();
+  p.position.set(x,5.2,z);
+  p.rotation.y = Math.PI / 2;
+
+  const b = new THREE.Mesh(
+    new THREE.CapsuleGeometry(0.45,2.7,8,18),
+    new THREE.MeshStandardMaterial({ color: 0xf0f0f0 })
+  );
+  b.rotation.x = Math.PI / 2;
+  p.add(b);
+
+  const n = new THREE.Mesh(
+    new THREE.ConeGeometry(0.45,0.8,20),
+    new THREE.MeshStandardMaterial({ color: 0xf0f0f0 })
+  );
+  n.rotation.x = -Math.PI / 2;
+  n.position.z = -1.75;
+  p.add(n);
+
+  p.add(new THREE.Mesh(
+    new THREE.BoxGeometry(4.8,0.08,0.6),
+    new THREE.MeshStandardMaterial({ color: 0xdedede })
+  ));
+
+  g.add(p);
+}
+
+function createPerson(group,x,z,role="passenger") {
+  const person = new THREE.Group();
+
+  const skinColors = [0xffcc99,0xd6a06a,0x8d5524,0xf1c27d,0xc68642];
+  const shirtColors = [0x3366ff,0x22aa66,0xcc3333,0xffaa33,0x8844ff,0xffffff,0x222222];
+  const trouserColors = [0x111133,0x333333,0x225577,0x444444,0x222222];
+  const hairColors = [0x111111,0x4a2c1a,0xd2b48c,0x222222];
+
+  let shirtColor = shirtColors[Math.floor(Math.random()*shirtColors.length)];
+  let trouserColor = trouserColors[Math.floor(Math.random()*trouserColors.length)];
+  let skinColor = skinColors[Math.floor(Math.random()*skinColors.length)];
+  let hairColor = hairColors[Math.floor(Math.random()*hairColors.length)];
+
+  if(role === "ground") {
+    shirtColor = 0xffaa00;
+    trouserColor = 0x222222;
+  }
+
+  if(role === "pilot") {
+    shirtColor = 0xffffff;
+    trouserColor = 0x111133;
+  }
+
+  if(role === "cafe") {
+    shirtColor = 0xff8844;
+    trouserColor = 0x333333;
+  }
+
+  const shirtMat = new THREE.MeshStandardMaterial({ color: shirtColor });
+  const trouserMat = new THREE.MeshStandardMaterial({ color: trouserColor });
+  const skinMat = new THREE.MeshStandardMaterial({ color: skinColor });
+  const hairMat = new THREE.MeshStandardMaterial({ color: hairColor });
+  const blackMat = new THREE.MeshStandardMaterial({ color: 0x111111 });
+
+  const torso = new THREE.Mesh(new THREE.BoxGeometry(0.42,0.75,0.24), shirtMat);
+  torso.position.y = 1.15;
+  person.add(torso);
+
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.23,16,16), skinMat);
+  head.position.y = 1.68;
+  person.add(head);
+
+  const hair = new THREE.Mesh(new THREE.SphereGeometry(0.235,16,8), hairMat);
+  hair.scale.set(1,0.45,1);
+  hair.position.y = 1.84;
+  person.add(hair);
+
+  const leftArm = new THREE.Mesh(new THREE.BoxGeometry(0.12,0.55,0.12), skinMat);
+  leftArm.position.set(-0.33,1.1,0);
+  person.add(leftArm);
+
+  const rightArm = new THREE.Mesh(new THREE.BoxGeometry(0.12,0.55,0.12), skinMat);
+  rightArm.position.set(0.33,1.1,0);
+  person.add(rightArm);
+
+  const leftLeg = new THREE.Mesh(new THREE.BoxGeometry(0.15,0.58,0.14), trouserMat);
+  leftLeg.position.set(-0.12,0.45,0);
+  person.add(leftLeg);
+
+  const rightLeg = new THREE.Mesh(new THREE.BoxGeometry(0.15,0.58,0.14), trouserMat);
+  rightLeg.position.set(0.12,0.45,0);
+  person.add(rightLeg);
+
+  const leftShoe = new THREE.Mesh(new THREE.BoxGeometry(0.18,0.08,0.26), blackMat);
+  leftShoe.position.set(-0.12,0.12,-0.04);
+  person.add(leftShoe);
+
+  const rightShoe = new THREE.Mesh(new THREE.BoxGeometry(0.18,0.08,0.26), blackMat);
+  rightShoe.position.set(0.12,0.12,-0.04);
+  person.add(rightShoe);
+
+  if(role === "passenger") {
+    const luggage = new THREE.Mesh(
+      new THREE.BoxGeometry(0.34,0.45,0.24),
+      new THREE.MeshStandardMaterial({ color: 0x222222 })
+    );
+    luggage.position.set(0.45,0.42,0.08);
+    person.add(luggage);
+  }
+
+  if(role === "pilot") {
+    const hat = new THREE.Mesh(new THREE.BoxGeometry(0.45,0.08,0.28), blackMat);
+    hat.position.y = 1.93;
+    person.add(hat);
+  }
+
+  if(role === "ground") {
+    const helmet = new THREE.Mesh(
+      new THREE.SphereGeometry(0.25,16,8),
+      new THREE.MeshStandardMaterial({ color: 0xffff00 })
+    );
+    helmet.scale.set(1,0.45,1);
+    helmet.position.y = 1.9;
+    person.add(helmet);
+  }
+
+  person.scale.setScalar(1.1 + Math.random()*0.16);
+  person.position.set(x,4.25,z);
+  person.userData = {
+    startX:x,
+    startZ:z,
+    walkOffset:Math.random()*100,
+    walkRadius:2+Math.random()*5,
+    role,
+    leftLeg,
+    rightLeg,
+    leftArm,
+    rightArm,
+    baseY:4.25,
+    stride:0,
+    speed:0.005+Math.random()*0.004,
+    targetX:x+(Math.random()-0.5)*10,
+    targetZ:z+(Math.random()-0.5)*10
+  };
+
+  group.add(person);
+  npcs.push(person);
+}
+
+
+function createCafeInterior(g,baseX,baseZ) {
+  const tableMat = new THREE.MeshStandardMaterial({ color:0x7a4a24 });
+  const chairMat = new THREE.MeshStandardMaterial({ color:0x333333 });
+  for(let i=0;i<4;i++) {
+    const tx = baseX - 6 + i*4;
+    const tz = baseZ + 9;
+    box(1.7,0.25,1.7,tableMat,tx,5.3,tz,g);
+    box(0.8,1.0,0.8,chairMat,tx-1.6,5.0,tz,g);
+    box(0.8,1.0,0.8,chairMat,tx+1.6,5.0,tz,g);
+  }
+  sign("OPEN CAFE",baseX,12.5,baseZ+8.2,g,0.45);
+}
+
+function createAirportCrowd(group,size) {
+  for(let i=0;i<18;i++) {
+    createPerson(group,size*0.6+Math.random()*28,(Math.random()-0.5)*50,"passenger");
+  }
+
+  for(let i=0;i<10;i++) {
+    createPerson(group,size*0.35+Math.random()*20,size*0.18+Math.random()*18,"cafe");
+  }
+
+  for(let i=0;i<8;i++) {
+    createPerson(group,size*0.22+Math.random()*28,-size*0.22+Math.random()*25,"ground");
+  }
+
+  for(let i=0;i<4;i++) {
+    createPerson(group,size*0.48+Math.random()*18,-size*0.08+Math.random()*18,"pilot");
+  }
+}
+
+function createServiceVehicle(group,x,z,type="cart") {
+  const v = new THREE.Group();
+
+  const bodyColor = type === "fuel" ? 0xffdd00 : 0xffffff;
+  const vehicleBody = new THREE.Mesh(
+    new THREE.BoxGeometry(type === "fuel" ? 4.8 : 3.4, 1.2, type === "fuel" ? 2.2 : 1.8),
+    new THREE.MeshStandardMaterial({ color: bodyColor })
+  );
+  vehicleBody.position.y = 0.9;
+  v.add(vehicleBody);
+
+  const cab = new THREE.Mesh(
+    new THREE.BoxGeometry(1.4,1.1,1.6),
+    new THREE.MeshStandardMaterial({ color: 0xdddddd })
+  );
+  cab.position.set(type === "fuel" ? -1.7 : -0.9,1.75,0);
+  v.add(cab);
+
+  const wheelMat = new THREE.MeshStandardMaterial({ color: 0x111111 });
+  for(const wx of [-1.4,1.4]) {
+    for(const wz of [-0.8,0.8]) {
+      const wheel = new THREE.Mesh(new THREE.CylinderGeometry(0.32,0.32,0.22,16), wheelMat);
+      wheel.rotation.z = Math.PI/2;
+      wheel.position.set(wx,0.35,wz);
+      v.add(wheel);
+    }
+  }
+
+  v.position.set(x,4.25,z);
+  v.userData = {
+    startX:x,
+    startZ:z,
+    angle:Math.random()*Math.PI*2,
+    radius:8+Math.random()*12,
+    speed:0.18+Math.random()*0.12
+  };
+  group.add(v);
+  serviceVehicles.push(v);
+}
+
+function createAirportVehicles(group,size) {
+  createServiceVehicle(group,size*0.75,size*0.25,"fuel");
+  createServiceVehicle(group,size*0.95,-size*0.1,"cart");
+  createServiceVehicle(group,size*0.55,-size*0.25,"cart");
+}
+
+
+function createCoastRocks(g,size) {
+  const rockMat = new THREE.MeshStandardMaterial({ color:0x6f6f6f, roughness:0.8 });
+  for(let i=0;i<14;i++) {
+    const angle = Math.random()*Math.PI*2;
+    const r = size*(1.05+Math.random()*0.28);
+    const rock = new THREE.Mesh(
+      new THREE.DodecahedronGeometry(1.2+Math.random()*2.4,0),
+      rockMat
+    );
+    rock.position.set(Math.cos(angle)*r,4.2,Math.sin(angle)*r);
+    rock.scale.y = 0.45+Math.random()*0.5;
+    rock.rotation.set(Math.random()*2,Math.random()*2,Math.random()*2);
+    rock.castShadow = true;
+    rock.receiveShadow = true;
+    g.add(rock);
+  }
+}
+
+function createSmallVillage(g,size) {
+  const houseMat = new THREE.MeshStandardMaterial({ color:0xded1b5 });
+  const roofMat = new THREE.MeshStandardMaterial({ color:0x8b2b2b });
+  for(let i=0;i<5;i++) {
+    const hx = -size*0.55 + Math.random()*size*0.35;
+    const hz = -size*0.35 + Math.random()*size*0.7;
+    box(7,5,6,houseMat,hx,6,hz,g);
+    const roof = new THREE.Mesh(new THREE.ConeGeometry(5.5,3.5,4), roofMat);
+    roof.rotation.y = Math.PI/4;
+    roof.position.set(hx,10.2,hz);
+    roof.castShadow = true;
+    g.add(roof);
+  }
+}
+
+function createIsland(name,x,z,size,type) {
+  const g = new THREE.Group();
+  g.position.set(x,0,z);
+
+  const sand = new THREE.Mesh(new THREE.CylinderGeometry(size*1.35,size*1.7,3,128), mats.sand);
+  sand.position.y = 0;
+  sand.receiveShadow = true;
+  g.add(sand);
+
+  const grass = new THREE.Mesh(new THREE.CylinderGeometry(size*1.05,size*1.28,3.2,128), mats.grass);
+  grass.position.y = 2;
+  grass.receiveShadow = true;
+  g.add(grass);
+
+  createCoastRocks(g,size);
+
+  if(type === "tiny" || type === "treasure") {
+    createSmallVillage(g,size);
+  }
+
+  let cafe = null;
+  let fuelPad = null;
+
+  if(type === "mountain") {
+    for(let i=0;i<6;i++) {
+      const h = new THREE.Mesh(
+        new THREE.ConeGeometry(size*(0.18+Math.random()*0.25),35+Math.random()*60,32),
+        mats.rock
+      );
+      h.position.set((Math.random()-0.5)*size*1.1,25,(Math.random()-0.5)*size*1.1);
+      h.castShadow = true;
+      g.add(h);
+    }
+  }
+
+  if(type === "airport" || type === "fuel" || type === "abandoned") {
+    const runwayLength = type === "airport" ? size*3.0 : size*1.8;
+    const runwayWidth = size*0.22;
+
+    box(runwayWidth,0.25,runwayLength,mats.asphalt,0,3.9,0,g);
+
+    for(let i=-runwayLength*0.42;i<=runwayLength*0.42;i+=22) {
+      box(runwayWidth*0.12,0.05,8,mats.white,0,4.08,i,g);
+    }
+
+    for(let side of [-1,1]) {
+      for(let i=-3;i<=3;i++) {
+        box(1.2,0.06,10,mats.white,i*2.3,4.1,side*runwayLength*0.46,g);
+      }
+    }
+
+    const lightMat = new THREE.MeshStandardMaterial({ color:0xffffff, emissive:0x99ccff });
+    for(let i=-runwayLength*0.48;i<=runwayLength*0.48;i+=20) {
+      for(const side of [-1,1]) {
+        const l = new THREE.Mesh(new THREE.SphereGeometry(0.45,10,8), lightMat);
+        l.position.set(side*(runwayWidth/2+2.2),4.45,i);
+        g.add(l);
+      }
+    }
+
+    if(type === "airport") {
+      box(size*0.9,0.18,size*0.55,mats.taxi,runwayWidth*1.55,4.0,-size*0.1,g);
+      box(1,0.05,size*0.8,mats.yellow,runwayWidth*0.75,4.13,-size*0.1,g);
+      box(size*0.72,0.05,1,mats.yellow,runwayWidth*1.55,4.14,-size*0.1,g);
+
+      box(52,12,18,mats.terminal,runwayWidth*2.1,10,-size*0.45,g);
+      box(44,5,1,mats.glass,runwayWidth*2.1,11,-size*0.45-9.2,g);
+      sign(name.toUpperCase(),runwayWidth*2.1,18,-size*0.45-10,g,0.9);
+
+      cafe = box(22,8,15,mats.cafe,runwayWidth*1.55,7.5,size*0.25,g);
+
+      const roof = new THREE.Mesh(new THREE.ConeGeometry(15,6,4), new THREE.MeshStandardMaterial({ color:0xaa2222 }));
+      roof.rotation.y = Math.PI/4;
+      roof.position.set(runwayWidth*1.55,15,size*0.25);
+      roof.castShadow = true;
+      g.add(roof);
+
+      sign("CAFE",runwayWidth*1.55,13.5,size*0.25-8,g,0.55);
+      createCafeInterior(g,runwayWidth*1.55,size*0.25);
+
+      box(10,30,10,new THREE.MeshStandardMaterial({ color:0x888888 }),-runwayWidth*1.05,18,-size*0.38,g);
+      box(18,7,18,mats.glass,-runwayWidth*1.05,36,-size*0.38,g);
+
+      for(let i=0;i<2;i++) {
+        box(32,12,25,mats.hangar,runwayWidth*2.1,10,size*0.1+i*32,g);
+      }
+
+      createParkedPlane(g,runwayWidth*1.35,-size*0.05);
+      createParkedPlane(g,runwayWidth*1.75,-size*0.05);
+      createAirportCrowd(g,size);
+      createAirportVehicles(g,size);
+    }
+
+    fuelPad = new THREE.Mesh(new THREE.CylinderGeometry(size*0.14,size*0.14,0.25,48), mats.fuel);
+    fuelPad.position.set(size*0.32,4.2,size*0.35);
+    fuelPad.castShadow = true;
+    g.add(fuelPad);
+
+    const tank = new THREE.Mesh(new THREE.CylinderGeometry(4,4,14,28), new THREE.MeshStandardMaterial({ color:0xeeeeee }));
+    tank.rotation.z = Math.PI/2;
+    tank.position.set(size*0.32,8,size*0.55);
+    tank.castShadow = true;
+    g.add(tank);
+
+    if(type !== "abandoned") {
+      sign("FUEL",size*0.32,13,size*0.35-13,g,0.5);
+    }
+  }
+
+  if(type === "treasure") {
+    box(10,6,10,new THREE.MeshStandardMaterial({ color:0xffcc00, emissive:0x332200 }),0,7,0,g);
+    sign("SECRET",0,14,-7,g,0.55);
+  }
+
+  for(let i=0;i<Math.floor(size/3.8);i++) {
+    const tx = (Math.random()-0.5)*size*2.1;
+    const tz = (Math.random()-0.5)*size*2.1;
+    if(Math.abs(tx)>size*0.25 || Math.abs(tz)>size*0.55) {
+      createTree(g,tx,tz);
+    }
+  }
+
+  scene.add(g);
+  islands.push({ name,x,z,size,type,g,cafe,fuelPad,discovered:false });
+}
+
+createIsland("Starter Island",0,0,160,"airport");
+createIsland("North Bay",0,-700,145,"airport");
+createIsland("Cloud Point",-650,-1350,150,"airport");
+createIsland("Sunset Base",650,-2050,170,"airport");
+
+function generateChunk(cx,cz) {
+  const key = cx + "," + cz;
+  if(generatedChunks.has(key)) return;
+  generatedChunks.add(key);
+
+  if(cx === 0 && cz === 0) return;
+
+  const baseSeed = cx * 928371 + cz * 123457;
+  const count = 1 + Math.floor(seededRandom(baseSeed) * 3);
+  const types = ["tiny","mountain","fuel","abandoned","treasure","airport"];
+
+  for(let i=0;i<count;i++) {
+    const seed = baseSeed + i*101;
+    const rx = seededRandom(seed+1);
+    const rz = seededRandom(seed+2);
+    const rt = seededRandom(seed+3);
+    const rs = seededRandom(seed+4);
+
+    const x = cx * chunkSize + (rx - 0.5) * chunkSize * 0.75;
+    const z = cz * chunkSize + (rz - 0.5) * chunkSize * 0.75;
+
+    let type = types[Math.floor(rt * types.length)];
+    if(type === "airport" && seededRandom(seed+9) < 0.55) type = "fuel";
+
+    const size =
+      type === "tiny" ? 55 + rs*35 :
+      type === "treasure" ? 65 + rs*35 :
+      type === "airport" ? 125 + rs*55 :
+      85 + rs*65;
+
+    islandCounter++;
+    createIsland(type.toUpperCase()+" "+islandCounter,x,z,size,type);
+  }
+}
+
+function ensureIslandsAround(pos) {
+  const cx = Math.floor(pos.x / chunkSize);
+  const cz = Math.floor(pos.z / chunkSize);
+
+  for(let dx=-2;dx<=2;dx++) {
+    for(let dz=-2;dz<=2;dz++) {
+      generateChunk(cx+dx,cz+dz);
+    }
+  }
+}
+
+ensureIslandsAround(new THREE.Vector3(0,0,0));
+
+// Aircraft
+const plane = new THREE.Group();
+const engineSpinners = [];
+const gearParts = [];
+scene.add(plane);
+
+
+function addAircraftEffects() {
+  // Simple spinning engine/prop blur discs that work even if the OBJ model loads.
+  const spinnerMat = new THREE.MeshStandardMaterial({ color:0x333333, transparent:true, opacity:0.35, side:THREE.DoubleSide });
+  const positions = [
+    [-4.4,0.15,-0.25],
+    [-1.7,0.15,-0.25],
+    [1.7,0.15,-0.25],
+    [4.4,0.15,-0.25]
+  ];
+  for(const p of positions) {
+    const disc = new THREE.Mesh(new THREE.CircleGeometry(0.45,28), spinnerMat);
+    disc.position.set(p[0],p[1],p[2]);
+    disc.rotation.y = Math.PI/2;
+    plane.add(disc);
+    engineSpinners.push(disc);
+  }
+
+  const gearMat = new THREE.MeshStandardMaterial({ color:0x111111 });
+  for(const p of [[-1.2,-0.55,1.1],[1.2,-0.55,1.1],[0,-0.55,-1.3]]) {
+    const wheel = new THREE.Mesh(new THREE.CylinderGeometry(0.22,0.22,0.18,20), gearMat);
+    wheel.rotation.z = Math.PI/2;
+    wheel.position.set(p[0],p[1],p[2]);
+    plane.add(wheel);
+    gearParts.push(wheel);
+  }
+}
+
+function fallbackPlane() {
+  const b = new THREE.Mesh(new THREE.CapsuleGeometry(0.75,4.5,12,28), mats.red);
+  b.rotation.x = Math.PI/2;
+  plane.add(b);
+
+  const n = new THREE.Mesh(new THREE.ConeGeometry(0.75,1.5,36), mats.red);
+  n.rotation.x = -Math.PI/2;
+  n.position.z = -2.95;
+  plane.add(n);
+
+  const c = new THREE.Mesh(new THREE.SphereGeometry(0.58,28,18), mats.dark);
+  c.scale.set(0.85,0.45,1);
+  c.position.set(0,0.58,-0.82);
+  plane.add(c);
+
+  plane.add(new THREE.Mesh(new THREE.BoxGeometry(8.8,0.1,1.05), mats.red));
+
+  const tw = new THREE.Mesh(new THREE.BoxGeometry(3.2,0.08,0.65), mats.red);
+  tw.position.set(0,0.32,2.15);
+  plane.add(tw);
+
+  const f = new THREE.Mesh(new THREE.BoxGeometry(0.2,1.5,0.65), mats.red);
+  f.position.set(0,0.85,2.25);
+  plane.add(f);
+}
+
+let realLoaded = false;
+
+new MTLLoader().load(
+  "11803_Airplane_v1_l1.mtl",
+  materials => {
+    materials.preload();
+
+    const loader = new OBJLoader();
+    loader.setMaterials(materials);
+
+    loader.load(
+      "11803_Airplane_v1_l1.obj",
+      obj => {
+        obj.scale.set(0.006,0.006,0.006);
+        obj.rotation.set(Math.PI/2,Math.PI,-Math.PI/2);
+        obj.position.set(0,0.7,0);
+
+        obj.traverse(child => {
+          if(child.isMesh) {
+            child.castShadow = true;
+            child.receiveShadow = true;
+          }
+        });
+
+        plane.add(obj);
+        realLoaded = true;
+      },
+      undefined,
+      () => {
+        if(!realLoaded) fallbackPlane();
+      }
+    );
+  },
+  undefined,
+  () => fallbackPlane()
+);
+
+addAircraftEffects();
+
+// Player
+const player = new THREE.Group();
+const playerBody = new THREE.Mesh(
+  new THREE.CapsuleGeometry(0.45,1.3,8,16),
+  new THREE.MeshStandardMaterial({ color:0x2244ff })
+);
+playerBody.position.y = 1;
+player.add(playerBody);
+player.visible = false;
+scene.add(player);
+
+// Clouds
+function cloud(x,y,z) {
+  const g = new THREE.Group();
+  const mat = new THREE.MeshStandardMaterial({ color:0xffffff });
+
+  for(let i=0;i<8;i++) {
+    const p = new THREE.Mesh(new THREE.SphereGeometry(4+Math.random()*2,18,14), mat);
+    p.position.set(i*4-14,Math.random()*2,Math.random()*4);
+    g.add(p);
+  }
+
+  g.position.set(x,y,z);
+  scene.add(g);
+}
+
+for(let i=0;i<90;i++) {
+  cloud((Math.random()-0.5)*6500,70+Math.random()*180,(Math.random()-0.5)*6500);
+}
+
+// Controls
+const keys = {};
+let fPressed = false;
+let ePressed = false;
+
+addEventListener("keydown", e => {
+  keys[e.key.toLowerCase()] = true;
+  if(e.key.toLowerCase() === "c") cockpitView = !cockpitView;
+  if(e.key.toLowerCase() === "g") gearDown = !gearDown;
+  if(e.key.toLowerCase() === "l") clearProgress();
+});
+addEventListener("keyup", e => {
+  keys[e.key.toLowerCase()] = false;
+  if(e.key.toLowerCase() === "f") fPressed = false;
+  if(e.key.toLowerCase() === "e") ePressed = false;
+});
+
+function bindMobileButton(id,key) {
+  const btn = document.getElementById(id);
+  if(!btn) return;
+
+  const start = e => {
+    e.preventDefault();
+    keys[key] = true;
+  };
+
+  const end = e => {
+    e.preventDefault();
+    keys[key] = false;
+  };
+
+  btn.addEventListener("touchstart", start, { passive:false });
+  btn.addEventListener("touchend", end, { passive:false });
+  btn.addEventListener("mousedown", start);
+  btn.addEventListener("mouseup", end);
+  btn.addEventListener("mouseleave", end);
+}
+
+bindMobileButton("leftBtn","a");
+bindMobileButton("rightBtn","d");
+bindMobileButton("upBtn","arrowup");
+bindMobileButton("downBtn","arrowdown");
+bindMobileButton("throttleBtn","w");
+bindMobileButton("exitBtn","f");
+
+// Game state
+let mode = "flying";
+let throttle = 0;
+let speed = 0;
+let pitch = 0;
+let bank = 0;
+let verticalSpeed = 0;
+let fuel = 100;
+let hunger = 100;
+let currentAirport = "Starter Island";
+let message = "Mission: explore infinite islands and survive.";
+let crashed = false;
+let cockpitView = false;
+let gearDown = true;
+let flapsDown = false;
+let savedNoticeTimer = 0;
+let coins = 0;
+let unlockedJet = false;
+let aircraftName = "Starter Prop";
+let hasPlus = false;
+
+
+function saveProgress() {
+  const data = {
+    coins,
+    unlockedJet,
+    aircraftName,
+    hasPlus: (typeof hasPlus !== 'undefined' ? hasPlus : false),
+    discoveredNames: islands.filter(i => i.discovered).map(i => i.name)
+  };
+  localStorage.setItem("jetverseSave", JSON.stringify(data));
+  savedNoticeTimer = 180;
+}
+
+function loadProgress() {
+  try {
+    const raw = localStorage.getItem("jetverseSave");
+    if(!raw) return;
+    const data = JSON.parse(raw);
+    coins = data.coins || 0;
+    unlockedJet = !!data.unlockedJet;
+    aircraftName = data.aircraftName || "Starter Prop";
+    hasPlus = !!data.hasPlus;
+    if(hasPlus) {
+      const banner = document.getElementById("premiumBanner");
+      if(banner) banner.innerHTML = "🌍 JetVerse Plus Active";
+  saveProgress();
+    }
+    if(Array.isArray(data.discoveredNames)) {
+      for(const island of islands) {
+        if(data.discoveredNames.includes(island.name)) island.discovered = true;
+      }
+    }
+  } catch(e) {
+    console.warn("Save load failed", e);
+  }
+}
+
+function clearProgress() {
+  localStorage.removeItem("jetverseSave");
+  coins = 0;
+  unlockedJet = false;
+  aircraftName = "Starter Prop";
+  hasPlus = false;
+}
+
+function reset() {
+  mode = "flying";
+  plane.visible = true;
+  player.visible = false;
+  plane.position.set(0,6,130);
+  plane.rotation.set(0,Math.PI,0);
+
+  throttle = 0;
+  speed = 0;
+  pitch = 0;
+  bank = 0;
+  verticalSpeed = 0;
+  fuel = 100;
+  hunger = 100;
+  crashed = false;
+  currentAirport = "Starter Island";
+}
+reset();
+loadProgress();
+
+function nearest(pos) {
+  let best = null;
+  let bestD = Infinity;
+
+  for(const i of islands) {
+    const d = Math.hypot(i.x-pos.x,i.z-pos.z);
+    if(d < bestD) {
+      bestD = d;
+      best = i;
+    }
+  }
+
+  return { island:best, distance:bestD };
+}
+
+function getLandingSurface() {
+  const n = nearest(plane.position);
+  const localX = plane.position.x - n.island.x;
+  const localZ = plane.position.z - n.island.z;
+
+  const onIsland = n.distance < n.island.size * 1.15;
+  const runwayWidth = n.island.size * 0.22;
+  const runwayLength = n.island.type === "airport" ? n.island.size * 3.0 : n.island.size * 1.8;
+  const onRunway = onIsland && Math.abs(localX) < runwayWidth * 0.6 && Math.abs(localZ) < runwayLength * 0.48;
+
+  if(onRunway) return "runway";
+  if(onIsland) return "grass";
+  return "water";
+}
+
+function canExit() {
+  const n = nearest(plane.position);
+  return !crashed && plane.position.y < 8.5 && speed < 0.08 && n.distance < n.island.size * 1.2;
+}
+
+function walkMode() {
+  mode = "walking";
+  speed = 0;
+  throttle = 0;
+  player.visible = true;
+  player.position.set(plane.position.x+5,4.8,plane.position.z+3);
+}
+
+function flyMode() {
+  if(player.position.distanceTo(plane.position) < 9) {
+    mode = "flying";
+    player.visible = false;
+  }
+}
+
+function updateFlying() {
+  if(crashed) {
+    speed = 0;
+    throttle = 0;
+    verticalSpeed = 0;
+    message = "CRASHED. Press R to reset.";
+  } else {
+    if(keys["f"] && !fPressed) {
+      fPressed = true;
+      if(canExit()) walkMode();
+    }
+
+    const turboBoost = unlockedJet ? 1.22 : 1.0;
+
+    if(keys["w"] && fuel > 0) throttle += unlockedJet ? 0.016 : 0.012;
+    if(keys["s"]) throttle -= 0.018;
+
+    throttle = Math.max(0,Math.min(throttle,1));
+
+    const surface = getLandingSurface();
+    const onGround = plane.position.y <= 5.15 && surface !== "water";
+
+    if(onGround) {
+      speed += throttle * 0.018 * turboBoost;
+      if(keys["s"]) speed *= 0.86;
+      speed *= 0.992;
+      speed = Math.max(0,Math.min(speed,0.82));
+
+      let groundSteer = 0;
+      if(keys["a"]) groundSteer = 1;
+      if(keys["d"]) groundSteer = -1;
+
+      bank += (groundSteer * 0.12 - bank) * 0.12;
+      bank = Math.max(-0.18,Math.min(0.18,bank));
+
+      plane.rotation.y += groundSteer * 0.018 * Math.max(0.2,speed*2);
+
+      let targetPitch = 0;
+      if(keys["arrowup"] && speed > 0.34) targetPitch = 0.075;
+      if(keys["arrowdown"]) targetPitch = -0.035;
+
+      pitch += (targetPitch-pitch)*0.07;
+
+      plane.rotation.z = bank * 0.35;
+      plane.rotation.x = -pitch * 3;
+
+      plane.position.x -= Math.sin(plane.rotation.y)*speed;
+      plane.position.z -= Math.cos(plane.rotation.y)*speed;
+
+      if(speed > 0.36 && pitch > 0.025) {
+        verticalSpeed = 0.035;
+        plane.position.y += verticalSpeed;
+        message = "Rotate! Keep climbing gently.";
+      } else {
+        plane.position.y = 5;
+        verticalSpeed = 0;
+        message = "Rolling on runway. Hold W to accelerate. Press ↑ to take off.";
+      }
+    } else {
+      const targetSpeed = throttle * 0.9 * turboBoost;
+      speed += (targetSpeed-speed)*0.018;
+      speed *= 0.998;
+      speed = Math.max(0,Math.min(speed,0.9));
+
+      if(keys["a"]) bank += 0.018;
+      if(keys["d"]) bank -= 0.018;
+
+      bank *= 0.94;
+      bank = Math.max(-0.55,Math.min(0.55,bank));
+
+      let targetPitch = 0;
+      if(keys["arrowup"]) targetPitch = 0.08;
+      if(keys["arrowdown"]) targetPitch = -0.08;
+
+      pitch += (targetPitch-pitch)*0.06;
+
+      plane.rotation.z = bank;
+      plane.rotation.x = -pitch * 4;
+      plane.rotation.y += bank * 0.018 * Math.max(0.35,speed*2);
+
+      plane.position.x -= Math.sin(plane.rotation.y)*speed;
+      plane.position.z -= Math.cos(plane.rotation.y)*speed;
+
+      const lift = speed*0.036 + pitch*speed*2.2;
+      verticalSpeed += lift - 0.025;
+      verticalSpeed *= 0.94;
+
+      if(speed < 0.22 && plane.position.y > 7) verticalSpeed -= 0.018;
+
+      plane.position.y += verticalSpeed;
+    }
+
+    if(plane.position.y < 5) {
+      const surfaceNow = getLandingSurface();
+      const tooFast = speed > 0.55;
+      const tooHard = verticalSpeed < -0.22;
+
+      plane.position.y = 5;
+
+      if(surfaceNow === "water") {
+        message = "CRASH! You hit the ocean. Press R to reset.";
+        speed = 0;
+        throttle = 0;
+        verticalSpeed = 0;
+        crashed = true;
+      } else if(surfaceNow === "grass") {
+        if(tooFast || tooHard) {
+          message = "ROUGH GRASS LANDING! You survived, but slow down.";
+          speed *= 0.25;
+          throttle = 0;
+          verticalSpeed = 0;
+        } else {
+          message = "Grass landing. Taxi carefully.";
+          speed *= keys["s"] ? 0.86 : 0.94;
+          throttle *= 0.90;
+          verticalSpeed = 0;
+        }
+      } else {
+        if(tooFast || tooHard) {
+          message = "HARD RUNWAY LANDING! Brake and keep it straight.";
+          speed *= 0.55;
+          throttle *= 0.5;
+          verticalSpeed = 0;
+        } else {
+          message = "Smooth runway landing. Hold S to brake, then press F to exit.";
+          speed *= keys["s"] ? 0.82 : 0.98;
+          throttle *= keys["s"] ? 0.88 : 0.99;
+          verticalSpeed = 0;
+        }
+      }
+    }
+
+    if(speed > 0.04) {
+      fuel -= throttle * 0.012;
+      hunger -= 0.0018;
+    }
+
+    fuel = Math.max(0,fuel);
+    hunger = Math.max(0,hunger);
+
+    const n = nearest(plane.position);
+    if(n.distance < n.island.size * 1.45) {
+      if(!n.island.discovered) {
+        coins += 25;
+        saveProgress();
+      }
+      n.island.discovered = true;
+    }
+  }
+
+  if(cockpitView) {
+    const cockpitPos = new THREE.Vector3(
+      plane.position.x - Math.sin(plane.rotation.y)*2.2,
+      plane.position.y + 2.1,
+      plane.position.z - Math.cos(plane.rotation.y)*2.2
+    );
+
+    const lookPos = new THREE.Vector3(
+      plane.position.x - Math.sin(plane.rotation.y)*80,
+      plane.position.y + 2.5 + pitch*25,
+      plane.position.z - Math.cos(plane.rotation.y)*80
+    );
+
+    camera.position.lerp(cockpitPos,0.22);
+    camera.lookAt(lookPos);
+  } else {
+    const camDistance = 28;
+    const camHeight = 8;
+
+    const desired = new THREE.Vector3(
+      plane.position.x + Math.sin(plane.rotation.y)*camDistance,
+      plane.position.y + camHeight,
+      plane.position.z + Math.cos(plane.rotation.y)*camDistance
+    );
+
+    camera.position.lerp(desired,0.075);
+    camera.lookAt(plane.position.x,plane.position.y+1.5,plane.position.z);
+  }
+}
+
+function updateWalking() {
+  if(keys["f"] && !fPressed) {
+    fPressed = true;
+    flyMode();
+  }
+
+  const ws = 0.65;
+
+  if(keys["w"]) player.position.z -= ws;
+  if(keys["s"]) player.position.z += ws;
+  if(keys["a"]) player.position.x -= ws;
+  if(keys["d"]) player.position.x += ws;
+
+  player.position.y = 4.8;
+  message = "Walk to café/fuel pad. Press E. Press F near plane.";
+
+  for(const i of islands) {
+    if(i.cafe) {
+      const p = new THREE.Vector3();
+      i.cafe.getWorldPosition(p);
+
+      if(player.position.distanceTo(p) < 22) {
+        message = "At café: press E to eat.";
+        if(keys["e"] && !ePressed) {
+          ePressed = true;
+          hunger = 100;
+          currentAirport = i.name;
+        }
+      }
+    }
+
+    if(i.fuelPad) {
+      const p = new THREE.Vector3();
+      i.fuelPad.getWorldPosition(p);
+
+      if(player.position.distanceTo(p) < 24) {
+        message = coins >= 250 && !unlockedJet ? "At fuel station: press E to refuel + unlock TurboJet." : "At fuel station: press E to refuel.";
+                if(keys["e"] && !ePressed) {
+          ePressed = true;
+          fuel = 100;
+          currentAirport = i.name;
+
+          if(coins >= 250 && !unlockedJet) {
+            unlockedJet = true;
+            aircraftName = "JetVerse TurboJet";
+            message = "NEW AIRCRAFT UNLOCKED: JetVerse TurboJet ✈️";
+            saveProgress();
+          }
+        }
+      }
+    }
+  }
+
+  const desired = new THREE.Vector3(player.position.x,player.position.y+11,player.position.z+20);
+  camera.position.lerp(desired,0.12);
+  camera.lookAt(player.position.x,player.position.y+1,player.position.z);
+}
+
+function updateNPCs() {
+  for(const p of npcs) {
+    const data = p.userData;
+    const dx = data.targetX - p.position.x;
+    const dz = data.targetZ - p.position.z;
+    const dist = Math.sqrt(dx*dx + dz*dz);
+
+    if(dist < 0.35) {
+      data.targetX = data.startX + (Math.random()-0.5) * data.walkRadius * 4;
+      data.targetZ = data.startZ + (Math.random()-0.5) * data.walkRadius * 4;
+    }
+
+    const moveX = dist > 0 ? (dx / dist) * data.speed : 0;
+    const moveZ = dist > 0 ? (dz / dist) * data.speed : 0;
+
+    p.position.x += moveX;
+    p.position.z += moveZ;
+
+    const moved = Math.sqrt(moveX*moveX + moveZ*moveZ);
+
+    if(moved > 0.0001) {
+      const targetRot = Math.atan2(moveX,moveZ);
+      let rotDiff = targetRot - p.rotation.y;
+
+      while(rotDiff > Math.PI) rotDiff -= Math.PI*2;
+      while(rotDiff < -Math.PI) rotDiff += Math.PI*2;
+
+      p.rotation.y += rotDiff * 0.18;
+      data.stride += moved * 85;
+    }
+
+    if(data.leftLeg) {
+      const swing = Math.sin(data.stride) * 0.55;
+      const armSwing = Math.sin(data.stride) * 0.38;
+      const bob = Math.abs(Math.sin(data.stride)) * 0.045;
+
+      p.position.y = data.baseY + bob;
+
+      data.leftLeg.rotation.x = swing;
+      data.rightLeg.rotation.x = -swing;
+      data.leftArm.rotation.x = -armSwing;
+      data.rightArm.rotation.x = armSwing;
+
+      data.leftLeg.position.y = 0.45 + Math.max(0,Math.sin(data.stride)) * 0.045;
+      data.rightLeg.position.y = 0.45 + Math.max(0,-Math.sin(data.stride)) * 0.045;
+    }
+  }
+
+  for(const v of serviceVehicles) {
+    const d = v.userData;
+    d.angle += d.speed * 0.01;
+
+    const newX = d.startX + Math.cos(d.angle) * d.radius;
+    const newZ = d.startZ + Math.sin(d.angle) * d.radius * 0.55;
+
+    const dx = newX - v.position.x;
+    const dz = newZ - v.position.z;
+
+    v.position.x = newX;
+    v.position.z = newZ;
+
+    if(Math.abs(dx) + Math.abs(dz) > 0.0001) {
+      v.rotation.y = Math.atan2(dx,dz);
+    }
+  }
+}
+
+function updateUI() {
+  const controlled = mode === "flying" ? plane.position : player.position;
+  const n = nearest(controlled);
+  const found = islands.filter(i => i.discovered).length;
+
+  if(mode === "flying" && !crashed) {
+    const dx = n.island.x - plane.position.x;
+    const dz = n.island.z - plane.position.z;
+    const targetAngle = Math.atan2(-dx,-dz);
+
+    let diff = targetAngle - plane.rotation.y;
+
+    while(diff > Math.PI) diff -= Math.PI*2;
+    while(diff < -Math.PI) diff += Math.PI*2;
+
+    message = "Nearest island: " + n.island.name;
+
+    if(diff > 0.28) message = "Nearest island: bank left ◀";
+    if(diff < -0.28) message = "Nearest island: bank right ▶";
+    if(n.distance < 240) message = "Island nearby — line up with runway and slow down.";
+    if(speed < 0.22 && plane.position.y > 12) message = "STALL WARNING: lower nose / add throttle.";
+    if(canExit()) message = "Stopped safely. Press F to get off the plane.";
+    if(fuel < 25) message = "LOW FUEL — find airport or fuel island.";
+    if(hunger < 25) message = "HUNGRY — find an airport café.";
+    if(savedNoticeTimer > 0) message = "Progress saved 💾";
+  }
+
+  document.getElementById("mode").textContent = mode === "flying" ? "Flying" : "Walking";
+  document.getElementById("speed").textContent = mode === "flying" ? Math.round(speed*520) : 0;
+  document.getElementById("altitude").textContent = Math.round((plane.position.y-5)*10);
+  document.getElementById("fuel").textContent = Math.round(fuel);
+  document.getElementById("coins").textContent = Math.round(coins);
+  document.getElementById("aircraftName").textContent = aircraftName;
+  document.getElementById("hunger").textContent = Math.round(hunger);
+  document.getElementById("found").textContent = found;
+  document.getElementById("nearest").textContent = n.island.name;
+  document.getElementById("distance").textContent = Math.round(n.distance);
+  document.getElementById("message").textContent = message;
+
+  document.getElementById("controls").textContent =
+    mode === "flying"
+    ? "W throttle · S brake · A/D steer/bank · ↑/↓ pitch · F exit · C cockpit · R reset"
+    : "Walking: WASD move · E eat/refuel · F enter plane · R reset";
+}
+
+
+const shopButton =
+document.getElementById("shopButton");
+
+const premiumBanner =
+document.getElementById("premiumBanner");
+
+shopButton?.addEventListener("click",()=>{
+
+    if(!premiumBanner) return;
+
+    if(premiumBanner.style.display === "none"){
+        premiumBanner.style.display = "block";
+    } else {
+        premiumBanner.style.display = "none";
+    }
+});
+
+function animate() {
+  requestAnimationFrame(animate);
+
+  if(keys["r"]) reset();
+
+  if(mode === "flying") updateFlying();
+  else updateWalking();
+
+  const controlled = mode === "flying" ? plane.position : player.position;
+  ensureIslandsAround(controlled);
+
+  updateNPCs();
+  updateUI();
+
+  for(const disc of engineSpinners) {
+    disc.rotation.x += 0.4 + throttle*1.8;
+    disc.visible = speed > 0.02 || throttle > 0.1;
+  }
+
+  for(const gear of gearParts) {
+    gear.visible = gearDown || plane.position.y < 12;
+  }
+
+  const cockpit = document.getElementById("cockpitOverlay");
+  if(cockpit) cockpit.style.display = cockpitView ? "block" : "none";
+
+  const cs = document.getElementById("cockpitSpeed");
+  const ca = document.getElementById("cockpitAlt");
+  const cf = document.getElementById("cockpitFuel");
+  if(cs) cs.textContent = Math.round(speed*520);
+  if(ca) ca.textContent = Math.round((plane.position.y-5)*10);
+  if(cf) cf.textContent = Math.round(fuel);
+
+  if(savedNoticeTimer > 0) savedNoticeTimer--;
+
+  renderer.render(scene,camera);
+}
+
+animate();
+
+addEventListener("resize", () => {
+  camera.aspect = innerWidth / innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth,innerHeight);
+});
+</script>
+</body>
+</html>
