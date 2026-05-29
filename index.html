@@ -1597,16 +1597,23 @@ function animate() {
 new OBJLoader().load(
   "models/airports/Jetway.obj",
   obj => {
-    obj.scale.set(0.08,0.08,0.08);
-    obj.position.copy(plane.position);
-    obj.position.y += 30;
-    scene.add(obj);
-    console.log("JETWAY OBJ DEBUG LOADED", obj);
+    const box = new THREE.Box3().setFromObject(obj);
+    const center = box.getCenter(new THREE.Vector3());
+    obj.position.sub(center);
+
+    const wrapper = new THREE.Group();
+    wrapper.add(obj);
+
+    wrapper.scale.set(0.05,0.05,0.05);
+    wrapper.position.copy(plane.position);
+    wrapper.position.y += 50;
+
+    scene.add(wrapper);
+    console.log("JETWAY CENTERED DEBUG LOADED", wrapper);
   },
   undefined,
   err => console.error("JETWAY OBJ FAILED", err)
 );
-
 
 animate();
 
