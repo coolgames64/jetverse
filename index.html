@@ -1621,6 +1621,27 @@ function animate() {
   renderer.render(scene,camera);
 }
 
+
+// SIMPLE AIRPORT MODELS
+new OBJLoader().load(
+  "models/airports/Jetway.obj",
+  obj => {
+    obj.scale.set(0.18,0.18,0.18);
+    obj.position.set(1230,4,-860);
+    scene.add(obj);
+  }
+);
+
+new OBJLoader().load(
+  "models/airports/Catering Truck.obj",
+  obj => {
+    obj.scale.set(0.08,0.08,0.08);
+    obj.position.set(1220,4,-870);
+    scene.add(obj);
+  }
+);
+
+
 animate();
 
 addEventListener("resize", () => {
