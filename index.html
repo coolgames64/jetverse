@@ -1017,7 +1017,7 @@ let hunger = 100;
 let currentAirport = "Starter Island";
 let message = "Mission: explore infinite islands and survive.";
 let crashed = false;
-  crashAnimationPlayed = false;
+  if(typeof crashAnimationPlayed !== 'undefined') crashAnimationPlayed = false;
   if(plane) plane.visible = true;
 let crashAnimationPlayed = false;
 const crashPieces = [];
