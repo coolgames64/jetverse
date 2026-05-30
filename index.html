@@ -1617,19 +1617,33 @@ scene.traverse(obj=>{
 
 
 
-// REAL AIRPORT TERMINAL DEBUG
+
+// AIRPORT BUILDING DEBUG
 new GLTFLoader().load(
   "models/airports/Modern_Airport_Terminal.glb",
   gltf => {
-    const terminal = gltf.scene;
-    terminal.scale.set(0.18,0.18,0.18);
-    terminal.position.set(35,4,-10);
-    terminal.rotation.y = Math.PI;
-    scene.add(terminal);
-    console.log("REAL TERMINAL LOADED", terminal);
+    const airport = gltf.scene;
+
+    const box = new THREE.Box3().setFromObject(airport);
+    const center = box.getCenter(new THREE.Vector3());
+    airport.position.sub(center);
+
+    const wrapper = new THREE.Group();
+    wrapper.add(airport);
+
+    wrapper.scale.set(1,1,1);
+
+    const dir = new THREE.Vector3();
+    camera.getWorldDirection(dir);
+    wrapper.position.copy(camera.position);
+    wrapper.position.add(dir.multiplyScalar(80));
+    wrapper.position.y += 10;
+
+    scene.add(wrapper);
+    console.log("AIRPORT BUILDING LOADED", wrapper);
   },
   undefined,
-  err => console.error("REAL TERMINAL FAILED", err)
+  err => console.error("AIRPORT BUILDING FAILED", err)
 );
 
 
