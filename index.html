@@ -1631,13 +1631,13 @@ new GLTFLoader().load(
     const wrapper = new THREE.Group();
     wrapper.add(airport);
 
-    wrapper.scale.set(1,1,1);
+    wrapper.scale.set(20,20,20);
 
     const dir = new THREE.Vector3();
     camera.getWorldDirection(dir);
     wrapper.position.copy(camera.position);
-    wrapper.position.add(dir.multiplyScalar(80));
-    wrapper.position.y += 10;
+    wrapper.position.add(dir.multiplyScalar(25));
+    wrapper.position.y += 0;
 
     scene.add(wrapper);
     console.log("AIRPORT BUILDING LOADED", wrapper);
