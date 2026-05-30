@@ -1622,8 +1622,8 @@ new GLTFLoader().load(
   "models/airports/Modern_Airport_Terminal.glb",
   gltf => {
     const terminal = gltf.scene;
-    terminal.scale.set(8,8,8);
-    terminal.position.set(85,4,-72);
+    terminal.scale.set(0.18,0.18,0.18);
+    terminal.position.set(35,4,-10);
     terminal.rotation.y = Math.PI;
     scene.add(terminal);
     console.log("REAL TERMINAL LOADED", terminal);
