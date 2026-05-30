@@ -1624,6 +1624,18 @@ new GLTFLoader().load(
   gltf => {
     const airport = gltf.scene;
 
+    
+airport.traverse(child=>{
+  if(child.isMesh){
+    child.material = new THREE.MeshStandardMaterial({
+      color:0xd9d9d9,
+      roughness:0.7,
+      metalness:0.05,
+      side:THREE.DoubleSide
+    });
+  }
+});
+
     const box = new THREE.Box3().setFromObject(airport);
     const center = box.getCenter(new THREE.Vector3());
     airport.position.sub(center);
