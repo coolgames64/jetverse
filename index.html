@@ -266,6 +266,7 @@ box-shadow:0 4px 14px rgba(0,0,0,0.4);
 <script type="module">
 import * as THREE from "three";
 import { OBJLoader } from "three/addons/loaders/OBJLoader.js";
+import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { MTLLoader } from "three/addons/loaders/MTLLoader.js";
 
 const scene = new THREE.Scene();
@@ -671,6 +672,9 @@ function addAirportModelsToIsland(group, runwayWidth, size){
   truck.scale.set(0.015,0.015,0.015);
   truck.position.set(runwayWidth*1.45,5.0,-size*0.08);
   truck.rotation.y = Math.PI / 2;
+  truck.userData.moveSpeed = 0.04;
+  truck.userData.moveDir = 1;
+  truck.userData.baseX = truck.position.x;
   group.add(truck);
 
   group.userData.airportPropsAdded = true;
@@ -1595,9 +1599,35 @@ function animate() {
   if(savedNoticeTimer > 0) savedNoticeTimer--;
 
   
+  
+scene.traverse(obj=>{
+  if(obj.userData.moveSpeed){
+    obj.position.x += obj.userData.moveSpeed * obj.userData.moveDir;
+    if(obj.position.x > obj.userData.baseX + 18) obj.userData.moveDir = -1;
+    if(obj.position.x < obj.userData.baseX - 18) obj.userData.moveDir = 1;
+  }
+});
+
   renderer.render(scene,camera);
 }
 
+
+
+
+// REAL AIRPORT TERMINAL DEBUG
+new GLTFLoader().load(
+  "models/airports/Modern_Airport_Terminal.glb",
+  gltf => {
+    const terminal = gltf.scene;
+    terminal.scale.set(8,8,8);
+    terminal.position.set(85,4,-72);
+    terminal.rotation.y = Math.PI;
+    scene.add(terminal);
+    console.log("REAL TERMINAL LOADED", terminal);
+  },
+  undefined,
+  err => console.error("REAL TERMINAL FAILED", err)
+);
 
 
 animate();
