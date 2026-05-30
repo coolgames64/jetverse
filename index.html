@@ -662,13 +662,13 @@ function addAirportModelsToIsland(group, runwayWidth, size){
   if(group.userData.airportPropsAdded) return;
 
   const jetway = jetwayTemplate.clone(true);
-  jetway.scale.set(0.18,0.18,0.18);
+  jetway.scale.set(0.75,0.75,0.75);
   jetway.position.set(runwayWidth*2.0,8.5,-size*0.48);
   jetway.rotation.y = Math.PI / 2;
   group.add(jetway);
 
   const truck = cateringTruckTemplate.clone(true);
-  truck.scale.set(0.12,0.12,0.12);
+  truck.scale.set(0.015,0.015,0.015);
   truck.position.set(runwayWidth*1.45,5.0,-size*0.08);
   truck.rotation.y = Math.PI / 2;
   group.add(truck);
