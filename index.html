@@ -729,6 +729,184 @@ new OBJLoader().load("models/airports/Catering Truck.obj", obj=>{
 });
 
 
+
+// JETVERSE_CONNECTED_AIRPORT_ASSETS
+var JV_connectedAirportAssets = {
+  airports: [],
+  airportBuilding: null,
+  airportBuildingSize: null,
+  jetway: null,
+  jetwaySize: null,
+  truck: null,
+  truckSize: null,
+  movingTrucks: []
+};
+
+function JV_centerModel(obj){
+  const box = new THREE.Box3().setFromObject(obj);
+  const center = box.getCenter(new THREE.Vector3());
+  const size = box.getSize(new THREE.Vector3());
+
+  obj.position.sub(center);
+
+  obj.traverse(child=>{
+    if(child.isMesh){
+      child.castShadow = true;
+      child.receiveShadow = true;
+
+      // Keep original texture/material
+      if(child.material){
+        const mats = Array.isArray(child.material) ? child.material : [child.material];
+        mats.forEach(mat=>{
+          if(mat){
+            mat.side = THREE.DoubleSide;
+            mat.needsUpdate = true;
+          }
+        });
+      }
+    }
+  });
+
+  return size;
+}
+
+function JV_registerAirport(group, runwayWidth, size){
+  if(!group) return;
+
+  JV_connectedAirportAssets.airports.push({
+    group,
+    runwayWidth,
+    size
+  });
+
+  JV_attachAirportAssets(group, runwayWidth, size);
+}
+
+function JV_attachAirportAssets(group, runwayWidth, size){
+  group.userData = group.userData || {};
+
+  // Real airport building
+  if(JV_connectedAirportAssets.airportBuilding && !group.userData.JV_realAirportBuilding){
+    const airport = JV_connectedAirportAssets.airportBuilding.clone(true);
+    const raw = JV_connectedAirportAssets.airportBuildingSize || new THREE.Vector3(1,1,1);
+
+    const rawWidth = Math.max(raw.x, raw.z, 1);
+    const targetWidth = size * 1.4;
+    const scale = targetWidth / rawWidth;
+    const height = raw.y * scale;
+
+    airport.scale.set(scale, scale, scale);
+    airport.position.set(
+      runwayWidth * 2.05,
+      4.2 + height / 2,
+      -size * 0.48
+    );
+    airport.rotation.y = Math.PI;
+
+    group.add(airport);
+    group.userData.JV_realAirportBuilding = true;
+  }
+
+  // Jetway
+  if(JV_connectedAirportAssets.jetway && !group.userData.JV_realJetway){
+    const jetway = JV_connectedAirportAssets.jetway.clone(true);
+    const raw = JV_connectedAirportAssets.jetwaySize || new THREE.Vector3(1,1,1);
+
+    const rawLength = Math.max(raw.x, raw.z, 1);
+    const targetLength = size * 0.48;
+    const scale = targetLength / rawLength;
+    const height = raw.y * scale;
+
+    jetway.scale.set(scale, scale, scale);
+    jetway.position.set(
+      runwayWidth * 1.55,
+      4.2 + height / 2,
+      -size * 0.30
+    );
+    jetway.rotation.y = Math.PI / 2;
+
+    group.add(jetway);
+    group.userData.JV_realJetway = true;
+  }
+
+  // Moving catering truck
+  if(JV_connectedAirportAssets.truck && !group.userData.JV_realTruck){
+    const truck = JV_connectedAirportAssets.truck.clone(true);
+    const raw = JV_connectedAirportAssets.truckSize || new THREE.Vector3(1,1,1);
+
+    const rawLength = Math.max(raw.x, raw.z, 1);
+    const targetLength = size * 0.14;
+    const scale = targetLength / rawLength;
+    const height = raw.y * scale;
+
+    truck.scale.set(scale, scale, scale);
+    truck.position.set(
+      runwayWidth * 1.25,
+      4.2 + height / 2,
+      -size * 0.08
+    );
+    truck.rotation.y = Math.PI / 2;
+
+    truck.userData.JV_moveSpeed = 0.08;
+    truck.userData.JV_moveDir = 1;
+    truck.userData.JV_baseX = truck.position.x;
+
+    group.add(truck);
+    JV_connectedAirportAssets.movingTrucks.push(truck);
+
+    group.userData.JV_realTruck = true;
+  }
+}
+
+function JV_refreshConnectedAirports(){
+  JV_connectedAirportAssets.airports.forEach(a=>{
+    JV_attachAirportAssets(a.group, a.runwayWidth, a.size);
+  });
+}
+
+// Load real airport building with ORIGINAL texture/material
+new GLTFLoader().load(
+  "models/airports/Modern_Airport_Terminal.glb",
+  gltf=>{
+    const airport = gltf.scene;
+    JV_connectedAirportAssets.airportBuildingSize = JV_centerModel(airport);
+    JV_connectedAirportAssets.airportBuilding = airport;
+
+    console.log("CONNECTED AIRPORT BUILDING READY", JV_connectedAirportAssets.airportBuildingSize);
+    JV_refreshConnectedAirports();
+  },
+  undefined,
+  err=>console.error("CONNECTED AIRPORT BUILDING FAILED", err)
+);
+
+// Load jetway
+new OBJLoader().load(
+  "models/airports/Jetway.obj",
+  obj=>{
+    JV_connectedAirportAssets.jetwaySize = JV_centerModel(obj);
+    JV_connectedAirportAssets.jetway = obj;
+
+    console.log("CONNECTED JETWAY READY", JV_connectedAirportAssets.jetwaySize);
+    JV_refreshConnectedAirports();
+  },
+  undefined,
+  err=>console.error("CONNECTED JETWAY FAILED", err)
+);
+
+// Load catering truck
+new OBJLoader().load(
+  "models/airports/Catering Truck.obj",
+  obj=>{
+    JV_connectedAirportAssets.truckSize = JV_centerModel(obj);
+    JV_connectedAirportAssets.truck = obj;
+
+    console.log("CONNECTED CATERING TRUCK READY", JV_connectedAirportAssets.truckSize);
+    JV_refreshConnectedAirports();
+  },
+  undefined,
+  err=>console.error("CONNECTED CATERING TRUCK FAILED", err)
+);
+
 function createIsland(name,x,z,size,type) {
   const g = new THREE.Group();
   g.position.set(x,0,z);
@@ -818,6 +996,7 @@ function createIsland(name,x,z,size,type) {
 
       airportPropTargets.push({group:g, runwayWidth, size});
       refreshAirportProps();
+      JV_registerAirport(g, runwayWidth, size);
       createParkedPlane(g,runwayWidth*1.35,-size*0.05);
       createParkedPlane(g,runwayWidth*1.75,-size*0.05);
       createAirportCrowd(g,size);
@@ -1641,6 +1820,21 @@ if(typeof JV_airportAssets !== "undefined"){
   JV_airportAssets.movingTrucks.forEach(truck=>{
     if(!truck || !truck.userData) return;
 
+    truck.position.x += truck.userData.JV_moveSpeed * truck.userData.JV_moveDir;
+
+    if(truck.position.x > truck.userData.JV_baseX + 22){
+      truck.userData.JV_moveDir = -1;
+    }
+
+    if(truck.position.x < truck.userData.JV_baseX - 22){
+      truck.userData.JV_moveDir = 1;
+    }
+  });
+}
+
+  
+if(typeof JV_connectedAirportAssets !== "undefined"){
+  JV_connectedAirportAssets.movingTrucks.forEach(truck=>{
     truck.position.x += truck.userData.JV_moveSpeed * truck.userData.JV_moveDir;
 
     if(truck.position.x > truck.userData.JV_baseX + 22){
