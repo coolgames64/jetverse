@@ -716,7 +716,7 @@ function JVAttachAirportAssets(group, runwayWidth, size){
     const height = raw.y * scale;
 
     building.scale.set(scale, scale, scale);
-    building.position.set(runwayWidth * 2.05, 4.2 + height / 2, -size * 0.48);
+    building.position.set(runwayWidth * 2.18, 4.2 + height / 2, -size * 0.50);
     building.rotation.y = Math.PI;
 
     group.add(building);
@@ -731,8 +731,8 @@ function JVAttachAirportAssets(group, runwayWidth, size){
     const height = raw.y * scale;
 
     jetway.scale.set(scale, scale, scale);
-    jetway.position.set(runwayWidth * 1.55, 4.2 + height / 2, -size * 0.31);
-    jetway.rotation.y = Math.PI / 2;
+    jetway.position.set(runwayWidth * 1.78, 4.2 + height / 2, -size * 0.50);
+    jetway.rotation.y = 0;
 
     group.add(jetway);
     group.userData.JVJetwayAdded = true;
@@ -746,12 +746,14 @@ function JVAttachAirportAssets(group, runwayWidth, size){
     const height = raw.y * scale;
 
     truck.scale.set(scale, scale, scale);
-    truck.position.set(runwayWidth * 1.30, 4.2 + height / 2, -size * 0.08);
+    truck.position.set(runwayWidth * 2.85, 4.2 + height / 2, -size * 0.08);
     truck.rotation.y = Math.PI / 2;
 
     truck.userData.JVMoveSpeed = 0.08;
     truck.userData.JVMoveDir = 1;
     truck.userData.JVBaseX = truck.position.x;
+    truck.userData.JVBaseZ = truck.position.z;
+    truck.userData.JVMoveAxis = "z";
 
     group.add(truck);
     JVAirport.movingTrucks.push(truck);
@@ -1695,14 +1697,28 @@ function animate() {
   
 if(typeof JVAirport !== "undefined"){
   JVAirport.movingTrucks.forEach(truck=>{
-    truck.position.x += truck.userData.JVMoveSpeed * truck.userData.JVMoveDir;
+    if(truck.userData.JVMoveAxis === "z"){
+      truck.position.z += truck.userData.JVMoveSpeed * truck.userData.JVMoveDir;
 
-    if(truck.position.x > truck.userData.JVBaseX + 22){
-      truck.userData.JVMoveDir = -1;
-    }
+      if(truck.position.z > truck.userData.JVBaseZ + 32){
+        truck.userData.JVMoveDir = -1;
+        truck.rotation.y = 0;
+      }
 
-    if(truck.position.x < truck.userData.JVBaseX - 22){
-      truck.userData.JVMoveDir = 1;
+      if(truck.position.z < truck.userData.JVBaseZ - 32){
+        truck.userData.JVMoveDir = 1;
+        truck.rotation.y = Math.PI;
+      }
+    } else {
+      truck.position.x += truck.userData.JVMoveSpeed * truck.userData.JVMoveDir;
+
+      if(truck.position.x > truck.userData.JVBaseX + 22){
+        truck.userData.JVMoveDir = -1;
+      }
+
+      if(truck.position.x < truck.userData.JVBaseX - 22){
+        truck.userData.JVMoveDir = 1;
+      }
     }
   });
 }
